@@ -3,6 +3,7 @@ package audit_test
 import (
 	"bytes"
 	"encoding/json"
+	"errors"
 	"strings"
 	"testing"
 	"time"
@@ -96,6 +97,34 @@ func TestLogger_WriteEntry_IncludesNewline(t *testing.T) {
 	if !strings.HasSuffix(buf.String(), "\n") {
 		t.Error("expected log entry to end with newline")
 	}
+}
+
+func TestLogger_WriteEntry_ErrorPropagated(t *testing.T) {
+	t.Parallel()
+
+	// failWriter always returns an error on Write.
+	w := &failWriter{}
+	logger := audit.NewLogger(w)
+
+	e := audit.Entry{
+		AuditID:     "err-test",
+		Timestamp:   time.Now().UTC(),
+		Action:      "stop_service",
+		ServiceName: "redis",
+		Manager:     "systemd",
+		Outcome:     audit.OutcomeFailure,
+		Error:       "permission denied",
+	}
+	if err := logger.Write(e); err == nil {
+		t.Fatal("Write: expected error from failing writer, got nil")
+	}
+}
+
+// failWriter implements io.Writer and always returns an error.
+type failWriter struct{}
+
+func (fw *failWriter) Write(_ []byte) (int, error) {
+	return 0, errors.New("write failed")
 }
 
 func TestOutcomeValues(t *testing.T) {
