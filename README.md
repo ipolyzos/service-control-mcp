@@ -35,13 +35,12 @@ operation.
 
 | Tool | Description |
 |------|-------------|
-| `start_service` | Start a service |
-| `stop_service` | Stop a service (requires `confirm: true`) |
-| `restart_service` | Restart a service |
-| `reload_service` | Reload a service's configuration |
+| `start_service` | Start a stopped service |
+| `stop_service` | Stop a running service (requires `confirm: true`) |
+| `restart_service` | Restart a service (requires `confirm: true`) |
+| `reload_service` | Send a configuration reload signal to a service |
 
-All write operations return a structured response that includes an `audit_id`
-and are recorded in the audit log.
+All write operations emit a structured audit entry (see [Security](#security)).
 
 ## Security
 
@@ -51,7 +50,7 @@ and are recorded in the audit log.
 - All external commands run with bounded timeouts.
 - Every write action is recorded with a unique `audit_id`, timestamp, service
   name, action, and outcome.
-- Destructive operations (`stop_service`) require explicit `confirm: true`.
+- Destructive operations (`stop_service`, `restart_service`) require explicit `confirm: true`.
 
 ## Installation
 
