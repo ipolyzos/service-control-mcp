@@ -20,7 +20,10 @@ jobs:
     permissions:
       actions: read
       contents: read
-      security-events: write
+      # security-events: write is required to upload SARIF results to the
+      # Security tab. This requires GitHub Advanced Security on private repos.
+      # Uncomment when the repository is public or GHAS is enabled.
+      # security-events: write
 
     steps:
       - name: Checkout
@@ -33,7 +36,7 @@ jobs:
           cache: true
 
       - name: Initialize CodeQL
-        uses: github/codeql-action/init@ce64ddcb0d8d890d2df4a9d1c04ff297367dea2a # v3.35.2
+        uses: github/codeql-action/init@95e58e9a2cdfd71adc6e0353d5c52f41a045d225 # v4.35.2
         with:
           languages: go
           queries: security-extended
@@ -42,6 +45,8 @@ jobs:
         run: go build ./...
 
       - name: Perform CodeQL Analysis
-        uses: github/codeql-action/analyze@ce64ddcb0d8d890d2df4a9d1c04ff297367dea2a # v3.35.2
+        uses: github/codeql-action/analyze@95e58e9a2cdfd71adc6e0353d5c52f41a045d225 # v4.35.2
         with:
           category: /language:go
+          # Upload is a no-op on private repos without GHAS; analysis still runs.
+          upload: never
