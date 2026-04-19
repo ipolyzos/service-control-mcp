@@ -89,3 +89,42 @@ func TestFakeManager_ImplementsInterface(t *testing.T) {
 	// Compile-time assertion that fakeManager satisfies Manager.
 	var _ platform.Manager = (*fakeManager)(nil)
 }
+
+func TestUnsupportedPlatformError_ErrorString(t *testing.T) {
+	t.Parallel()
+
+	err := &platform.UnsupportedPlatformError{OS: "plan9"}
+	want := `unsupported platform: "plan9"`
+	if err.Error() != want {
+		t.Errorf("Error(): got %q, want %q", err.Error(), want)
+	}
+}
+
+func TestRegisterAndDetect_KnownPlatform(t *testing.T) {
+	t.Parallel()
+
+	const fakeOS = "test-os"
+	platform.Register(fakeOS, func() (platform.Manager, error) {
+		return &fakeManager{name: "fake-manager"}, nil
+	})
+	mgr, err := platform.DetectFor(fakeOS)
+	if err != nil {
+		t.Fatalf("DetectFor: unexpected error: %v", err)
+	}
+	if mgr.Name() != "fake-manager" {
+		t.Errorf("Name: got %q, want %q", mgr.Name(), "fake-manager")
+	}
+}
+
+func TestDetect_UnknownPlatform(t *testing.T) {
+	t.Parallel()
+
+	_, err := platform.DetectFor("unknown-os-xyz")
+	if err == nil {
+		t.Fatal("expected error for unknown OS, got nil")
+	}
+	var unsupported *platform.UnsupportedPlatformError
+	if !errors.As(err, &unsupported) {
+		t.Errorf("expected UnsupportedPlatformError, got %T", err)
+	}
+}

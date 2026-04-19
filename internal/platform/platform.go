@@ -110,10 +110,15 @@ func Register(goos string, factory func() (Manager, error)) {
 // Detect returns a Manager for the current runtime platform, or an
 // UnsupportedPlatformError if no adapter is registered for the OS.
 func Detect() (Manager, error) {
-	os := runtime.GOOS
-	factory, ok := registry[os]
+	return DetectFor(runtime.GOOS)
+}
+
+// DetectFor returns a Manager for the given GOOS value. It is exported
+// primarily to support testing with synthetic OS names.
+func DetectFor(goos string) (Manager, error) {
+	factory, ok := registry[goos]
 	if !ok {
-		return nil, ErrUnsupportedPlatform(os)
+		return nil, ErrUnsupportedPlatform(goos)
 	}
 	return factory()
 }
