@@ -1,0 +1,37 @@
+# Binaries
+/bin/
+*.exe
+*.dll
+*.so
+*.dylib
+
+# Build output
+dist/
+out/
+
+# Go toolchain
+*.test
+*.out
+coverage.txt
+coverage.html
+
+# Editor and OS artifacts
+.DS_Store
+Thumbs.db
+*.swp
+*.swo
+*~
+.idea/
+.vscode/
+*.iml
+
+# Environment
+.env
+.env.*
+!.env.example
+
+# Dependency cache (not vendored)
+vendor/
+
+# Test binaries
+__debug_bin*
