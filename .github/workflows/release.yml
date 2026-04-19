@@ -1,0 +1,65 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - "v*.*.*"
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    name: Build and publish release
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          fetch-depth: 0
+
+      - name: Set up Go
+        uses: actions/setup-go@d35c59abb061a4a6fb18e82ac0862c26744d6ab5 # v5.5.0
+        with:
+          go-version-file: go.mod
+          cache: true
+
+      - name: Run tests
+        run: go test -count=1 -race ./...
+
+      - name: Build release binaries
+        run: |
+          VERSION="${GITHUB_REF_NAME}"
+          LDFLAGS="-s -w -X main.version=${VERSION}"
+
+          GOOS=linux  GOARCH=amd64 go build -trimpath -ldflags="${LDFLAGS}" \
+            -o dist/service-control-mcp-linux-amd64 ./cmd/service-control-mcp
+
+          GOOS=linux  GOARCH=arm64 go build -trimpath -ldflags="${LDFLAGS}" \
+            -o dist/service-control-mcp-linux-arm64 ./cmd/service-control-mcp
+
+          GOOS=darwin GOARCH=amd64 go build -trimpath -ldflags="${LDFLAGS}" \
+            -o dist/service-control-mcp-darwin-amd64 ./cmd/service-control-mcp
+
+          GOOS=darwin GOARCH=arm64 go build -trimpath -ldflags="${LDFLAGS}" \
+            -o dist/service-control-mcp-darwin-arm64 ./cmd/service-control-mcp
+
+      - name: Generate checksums
+        run: |
+          cd dist
+          sha256sum * > sha256sums.txt
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@da05d552573ad5aba039eaec05055b435a7b3eb1 # v2.2.2
+        with:
+          files: |
+            dist/service-control-mcp-linux-amd64
+            dist/service-control-mcp-linux-arm64
+            dist/service-control-mcp-darwin-amd64
+            dist/service-control-mcp-darwin-arm64
+            dist/sha256sums.txt
+          generate_release_notes: false
+          draft: false
+          prerelease: ${{ contains(github.ref_name, '-') }}
