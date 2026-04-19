@@ -35,3 +35,6 @@ vendor/
 
 # Test binaries
 __debug_bin*
+
+# Local MCP client configuration (contains machine-specific absolute paths)
+.mcp.json
