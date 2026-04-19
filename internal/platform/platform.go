@@ -6,6 +6,7 @@ import (
 	"context"
 	"fmt"
 	"runtime"
+	"sync"
 )
 
 // ServiceState represents the normalized lifecycle state of a service.
@@ -98,12 +99,17 @@ func ErrUnsupportedPlatform(os string) error {
 	return &UnsupportedPlatformError{OS: os}
 }
 
+// registryMu guards registry against concurrent reads and writes.
+var registryMu sync.RWMutex
+
 // registry holds adapters registered by platform-specific init functions.
 var registry = map[string]func() (Manager, error){}
 
 // Register records a factory function for the given GOOS value.
 // It is called from each platform adapter's init().
 func Register(goos string, factory func() (Manager, error)) {
+	registryMu.Lock()
+	defer registryMu.Unlock()
 	registry[goos] = factory
 }
 
@@ -116,6 +122,8 @@ func Detect() (Manager, error) {
 // DetectFor returns a Manager for the given GOOS value. It is exported
 // primarily to support testing with synthetic OS names.
 func DetectFor(goos string) (Manager, error) {
+	registryMu.RLock()
+	defer registryMu.RUnlock()
 	factory, ok := registry[goos]
 	if !ok {
 		return nil, ErrUnsupportedPlatform(goos)
