@@ -71,14 +71,14 @@ test added before the fix.
   and pre-validated argument lists — never `sh -c`.
 - `ValidateServiceName` must be called before every platform invocation.
 - Write operations must be recorded via `internal/audit` with an `audit_id`.
-- `stop_service` must reject requests where `confirm != true`.
+- `stop_service` and `restart_service` must reject requests where `confirm != true`.
 - All exec calls use a 30-second `context.WithTimeout` ceiling.
 
 ## Adding a Tool
 
-1. Create `plugins/<tool_name>/plugin.go` implementing `plugin.Tool`.
-2. Create `plugins/<tool_name>/plugin_test.go` with table-driven tests.
-3. Register the plugin in `internal/runtime/server.go`.
+1. Write `plugins/<tool_name>/plugin_test.go` first (TDD — tests before implementation).
+2. Create `plugins/<tool_name>/plugin.go` implementing `plugin.Tool`.
+3. Register the plugin in `cmd/service-control-mcp/main.go` (the `tools` slice in `run()`).
 4. Add the tool contract to `docs/tools/<tool_name>.md`.
 5. Update the tool table in `README.md`.
 6. Add a CHANGELOG entry under `[Unreleased]`.
