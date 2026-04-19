@@ -2,7 +2,21 @@
 
 ## Description
 
-Returns the normalized runtime status of a single named service.
+Returns the normalized runtime status of a single named service. Provides
+the essential runtime state — whether the service is running, its PID, and
+when it became active — without the full metadata returned by `describe_service`.
+
+**When to use:** Use this tool to check whether a service is running before
+attempting a write operation, or to poll for state changes after starting or
+stopping a service. For richer metadata (unit file path, exec command, adapter
+extras), use `describe_service` instead.
+
+**Platform support**
+
+| Platform | Backend | Notes |
+|----------|---------|-------|
+| Linux (systemd) | `systemctl show` | Returns `sub_state` and `load_state` |
+| macOS (launchd) | `launchctl list` | `sub_state` and `load_state` may be empty |
 
 ## Input
 
@@ -37,23 +51,37 @@ Returns the normalized runtime status of a single named service.
 |-------|------|-------------|
 | `name` | string | Service name as provided |
 | `manager` | string | Platform adapter (`systemd` or `launchd`) |
-| `state` | string | Normalized state |
-| `sub_state` | string | Manager-specific sub-state (may be empty) |
-| `load_state` | string | Unit load state (systemd only; may be empty) |
-| `description` | string | Human-readable service description (may be empty) |
-| `active_since` | string | ISO-8601 timestamp when the service became active (may be empty) |
-| `pid` | int | Main process PID when running; 0 otherwise |
+| `state` | string | Normalized state — see [States](#states) |
+| `sub_state` | string | Manager-specific sub-state; may be empty on launchd |
+| `load_state` | string | Unit load state (systemd only; e.g. `loaded`, `not-found`) |
+| `description` | string | Human-readable service description; may be empty |
+| `active_since` | string | ISO-8601 timestamp when the service became active; empty if not running |
+| `pid` | integer | Main process PID when running; `0` otherwise |
+
+## States
+
+| Value | Meaning |
+|-------|---------|
+| `running` | Service is active and running |
+| `stopped` | Service is inactive |
+| `failed` | Service has failed |
+| `starting` | Service is in the process of starting |
+| `stopping` | Service is in the process of stopping |
+| `unknown` | State could not be determined |
 
 ## Errors
 
 | Condition | Error message |
 |-----------|---------------|
-| Invalid service name | `validation error: field "service_name": …` |
-| Service not found | Manager-specific error, e.g. `Unit nginx.service not found` |
+| `service_name` missing or not a string | `validation error: field "service_name": …` |
+| Invalid characters or length | `validation error: field "service_name": …` |
+| Service not found (systemd) | `Unit nginx.service could not be found` |
+| Service not found (launchd) | Manager-specific error message |
 
 ## Security
 
-`service_name` is validated before any platform call.
+`service_name` is validated through `security.ValidateServiceName` before any
+platform call. No platform call is made on invalid input.
 
 ## Audit
 

@@ -6,6 +6,15 @@ Stops a running service. Because stopping a service is a disruptive
 operation, the caller must pass `confirm: true` explicitly. The
 operation is recorded in the audit log regardless of outcome.
 
+**When to use:** Use after `list_services` / `get_service_status` when you need to shut down a service deliberately.
+
+**Platform support**
+
+| Platform | Backend command | Notes |
+|----------|-----------------|-------|
+| Linux (systemd) | `systemctl stop <name>` | Stops the unit |
+| macOS (launchd) | `launchctl bootout <domain> <service>` | Removes the job from the user bootstrap domain |
+
 ## Input
 
 ```json

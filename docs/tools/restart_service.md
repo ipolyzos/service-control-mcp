@@ -6,6 +6,15 @@ Stops and restarts a service. Because a restart causes a brief service
 interruption, the caller must pass `confirm: true` explicitly. The
 operation is recorded in the audit log regardless of outcome.
 
+**When to use:** Use when you need a full stop/start cycle (not just a reload signal).
+
+**Platform support**
+
+| Platform | Backend command | Notes |
+|----------|-----------------|-------|
+| Linux (systemd) | `systemctl restart <name>` | Hard restart |
+| macOS (launchd) | `launchctl kickstart -k <domain>/<service>` | Kickstart with kill |
+
 ## Input
 
 ```json

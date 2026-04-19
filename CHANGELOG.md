@@ -7,6 +7,13 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 ## [Unreleased]
 
+### Changed
+
+- Documentation: README overview and MCP client examples; expanded
+  `docs/architecture.md` and `docs/security.md`; consistent tool reference
+  layout for read tools and aligned write-tool docs (`stop_service`,
+  `restart_service`, `reload_service`); added `docs/README.md` index.
+
 ## [0.1.0] - 2026-04-19
 
 ### Added
