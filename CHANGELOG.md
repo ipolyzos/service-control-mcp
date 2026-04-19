@@ -7,6 +7,8 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 ## [Unreleased]
 
+## [0.1.0] - 2026-04-19
+
 ### Added
 
 - Initial project scaffold: Go module, Apache-2.0 license, README,
@@ -38,3 +40,6 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
   `validate_service_name`, `get_service_logs`.
 - Write tools: `start_service`, `stop_service` (`confirm: true` required),
   `restart_service` (`confirm: true` required), `reload_service`.
+
+[Unreleased]: https://github.com/ipolyzos/service-control-mcp/compare/v0.1.0...HEAD
+[0.1.0]: https://github.com/ipolyzos/service-control-mcp/releases/tag/v0.1.0
