@@ -13,20 +13,20 @@ import (
 	"github.com/ipolyzos/service-control-mcp/internal/plugin"
 )
 
-const (
-	serverName    = "service-control-mcp"
-	serverVersion = "0.1.0"
-)
+const serverName = "service-control-mcp"
 
 // Server wraps the MCP server and the plugin registry.
 type Server struct {
-	mcp *mcpserver.MCPServer
+	mcp      *mcpserver.MCPServer
+	registry *plugin.Registry
 }
 
 // New creates an MCP server and registers all tools from the given registry.
-func New(reg *plugin.Registry) *Server {
+// version is injected at build time via ldflags (-X main.version=…).
+func New(reg *plugin.Registry, version string) *Server {
 	s := &Server{
-		mcp: mcpserver.NewMCPServer(serverName, serverVersion),
+		mcp:      mcpserver.NewMCPServer(serverName, version),
+		registry: reg,
 	}
 	for _, t := range reg.List() {
 		s.register(t)
@@ -41,6 +41,25 @@ func (s *Server) Serve(ctx context.Context) error {
 	return stdio.Listen(ctx, os.Stdin, os.Stdout)
 }
 
+// ExecuteTool invokes a registered tool by name with the given arguments.
+// Tool-level errors are returned as an isError result, not a Go error.
+// A Go error is returned only when the tool name is unknown or result
+// marshalling fails.
+func (s *Server) ExecuteTool(ctx context.Context, name string, args map[string]any) (*mcp.CallToolResult, error) {
+	t, err := s.registry.Lookup(name)
+	if err != nil {
+		return nil, fmt.Errorf("runtime: %w", err)
+	}
+	result, err := t.Execute(ctx, args)
+	if err != nil {
+		return &mcp.CallToolResult{
+			Content: []mcp.Content{mcp.NewTextContent(err.Error())},
+			IsError: true,
+		}, nil
+	}
+	return encodeResult(result)
+}
+
 func (s *Server) register(t plugin.Tool) {
 	tool := mcp.NewToolWithRawSchema(t.Name(), t.Description(), t.InputSchema())
 	s.mcp.AddTool(tool, func(ctx context.Context, req mcp.CallToolRequest) (*mcp.CallToolResult, error) {
@@ -48,14 +67,7 @@ func (s *Server) register(t plugin.Tool) {
 		if args == nil {
 			args = map[string]any{}
 		}
-		result, err := t.Execute(ctx, args)
-		if err != nil {
-			return &mcp.CallToolResult{
-				Content: []mcp.Content{mcp.NewTextContent(err.Error())},
-				IsError: true,
-			}, nil
-		}
-		return encodeResult(result)
+		return s.ExecuteTool(ctx, t.Name(), args)
 	})
 }
 

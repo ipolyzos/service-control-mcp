@@ -26,6 +26,9 @@ import (
 	validate "github.com/ipolyzos/service-control-mcp/plugins/validate_service_name"
 )
 
+// version is injected at build time via -ldflags "-X main.version=<tag>".
+var version = "dev"
+
 func main() {
 	if err := run(); err != nil {
 		fmt.Fprintf(os.Stderr, "service-control-mcp: %v\n", err)
@@ -59,6 +62,6 @@ func run() error {
 		}
 	}
 
-	srv := runtime.New(reg)
+	srv := runtime.New(reg, version)
 	return srv.Serve(context.Background())
 }
