@@ -1,0 +1,30 @@
+version: "2"
+
+linters:
+  enable:
+    - errcheck
+    - govet
+    - ineffassign
+    - staticcheck
+    - unused
+    - bodyclose
+    - contextcheck
+    - exhaustive
+    - gocritic
+    - godot
+    - noctx
+    - prealloc
+    - revive
+    - thelper
+    - unparam
+    - whitespace
+
+  settings:
+    govet:
+      enable-all: true
+    exhaustive:
+      default-signifies-exhaustive: true
+    revive:
+      rules:
+        - name: exported
+          severity: warning
