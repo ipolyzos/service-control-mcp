@@ -22,26 +22,27 @@ linters:
     - unparam
     - whitespace
 
-linters-settings:
-  govet:
-    enable-all: true
-  revive:
-    rules:
-      - name: exported
-        severity: warning
-  stylecheck:
-    checks:
-      - all
-      - "-ST1000"
-      - "-ST1003"
-  exhaustive:
-    default-signifies-exhaustive: true
+  settings:
+    govet:
+      enable-all: true
+    revive:
+      rules:
+        - name: exported
+          severity: warning
+    stylecheck:
+      checks:
+        - all
+        - "-ST1000"
+        - "-ST1003"
+    exhaustive:
+      default-signifies-exhaustive: true
 
 issues:
   max-issues-per-linter: 0
   max-same-issues: 0
-  exclude-rules:
-    - path: "_test\\.go$"
-      linters:
-        - gocritic
-        - unparam
+  exclusions:
+    rules:
+      - path: "_test\\.go$"
+        linters:
+          - gocritic
+          - unparam
