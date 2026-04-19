@@ -52,7 +52,7 @@ jobs:
           sha256sum * > sha256sums.txt
 
       - name: Create GitHub Release
-        uses: softprops/action-gh-release@da05d552573ad5aba039eaec05055b435a7b3eb1 # v2.2.2
+        uses: softprops/action-gh-release@da05d552573ad5aba039eaac05058a918a7bf631 # v2.2.2
         with:
           files: |
             dist/service-control-mcp-linux-amd64
