@@ -2,11 +2,19 @@
 
 ## Description
 
-Validates a service identifier against the allowed character set and
-length constraints before it is used in a write operation. This tool
-never returns a Go error for an invalid name — it always returns a
-structured result with `valid: false` and a reason string, so the
-caller can inspect and report the problem without an error handler.
+Validates a service identifier against the allowed character set and length
+constraints. Unlike all other tools, an invalid name is **not** a Go-level
+error — it is always returned as a structured result with `valid: false` and a
+human-readable `error` string. This lets the caller inspect and report the
+problem gracefully without error-handling logic.
+
+**When to use:** Use this tool to pre-validate a name before constructing a
+write operation, or to give callers a clean way to explain why a
+service name is rejected. Note that all write tools run the same validation
+internally — passing this check is advisory, not a bypass.
+
+**Platform support:** This tool is platform-independent. It does not invoke
+any system command.
 
 ## Input
 
@@ -34,7 +42,7 @@ caller can inspect and report the problem without an error handler.
 
 ```json
 {
-  "service_name": "bad name!",
+  "service_name": "my service!",
   "valid": false,
   "error": "validation error: field \"service_name\": contains invalid characters; only [a-zA-Z0-9._@:-] are permitted"
 }
@@ -42,28 +50,35 @@ caller can inspect and report the problem without an error handler.
 
 | Field | Type | Description |
 |-------|------|-------------|
-| `service_name` | string | Name as provided |
-| `valid` | bool | `true` if the name passes all validation rules |
+| `service_name` | string | Name as provided by the caller |
+| `valid` | boolean | `true` if the name passes all validation rules |
 | `error` | string | Reason for failure; empty string when `valid` is `true` |
 
 ## Validation rules
 
 | Rule | Constraint |
 |------|-----------|
-| Length | 1–128 characters |
-| Characters | `[a-zA-Z0-9._@:-]` only |
+| Non-empty | At least 1 character |
+| Maximum length | 128 characters |
+| Allowed characters | `[a-zA-Z0-9._@:-]` only |
 | No path traversal | Must not contain `/` or `..` |
 
 ## Errors
 
-A Go-level error is returned only if the `service_name` argument is
-missing or is not a string. An invalid name is not a Go error.
+A Go-level error (returned as `isError: true` in the MCP response) is returned
+only when the `service_name` argument is missing entirely or is not a string.
+An invalid name is never a Go-level error.
+
+| Condition | Error type |
+|-----------|-----------|
+| `service_name` missing | Go-level error |
+| `service_name` not a string | Go-level error |
+| Name fails validation rules | Structured result with `valid: false` |
 
 ## Security
 
-Use this tool to pre-validate names before passing them to write tools.
-All write tools run the same validation internally, so this is an
-advisory check, not a bypass mechanism.
+This tool never invokes any platform command. It is a pure in-process
+validation check using the same logic applied by all other tools.
 
 ## Audit
 

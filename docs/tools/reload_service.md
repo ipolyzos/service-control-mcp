@@ -8,6 +8,15 @@ so it is not considered a destructive operation and does not require a
 confirmation flag. The operation is recorded in the audit log regardless
 of outcome.
 
+**When to use:** Prefer when the daemon supports reload without a full restart; use `restart_service` if reload is unsupported or ineffective.
+
+**Platform support**
+
+| Platform | Backend command | Notes |
+|----------|-----------------|-------|
+| Linux (systemd) | `systemctl reload <name>` | Unit-dependent; may map to reload or signal |
+| macOS (launchd) | `launchctl kill HUP <domain>/<service>` | Sends `SIGHUP` to the job |
+
 ## Input
 
 ```json
