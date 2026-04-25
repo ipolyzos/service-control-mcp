@@ -20,7 +20,7 @@ test:
 coverage: test
 	@total=$$($(GO) tool cover -func=$(COVERAGE) | grep total | awk '{print $$3}' | tr -d '%'); \
 	echo "Total coverage: $${total}%"; \
-	if [ "$$(echo "$${total} < $(MIN_COVER)" | bc -l)" = "1" ]; then \
+	if awk "BEGIN { exit !($${total} < $(MIN_COVER)) }"; then \
 		echo "Coverage $${total}% is below minimum $(MIN_COVER)%"; \
 		exit 1; \
 	fi
