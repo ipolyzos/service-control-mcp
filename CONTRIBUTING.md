@@ -5,7 +5,7 @@ Thank you for your interest in contributing to `service-control-mcp`.
 ## Prerequisites
 
 - Go 1.26 or later
-- `golangci-lint` v1.64.8 ([install](https://golangci-lint.run/usage/install/))
+- `golangci-lint` v2.11.4 ([install](https://golangci-lint.run/usage/install/))
 - `make`
 
 ## Development Workflow
